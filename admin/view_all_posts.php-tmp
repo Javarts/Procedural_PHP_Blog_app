@@ -1,0 +1,210 @@
+<?php
+if (isset($_POST['checkBoxArray'])) {
+
+	$checkBoxArray = $_POST['checkBoxArray'];
+	foreach ($checkBoxArray as $postValueId) {
+
+		$bulk_options = $_POST['bulk_options'];
+
+		switch ($bulk_options) {
+			case 'published':
+				$pub_post_query = mysqli_query($connect, "UPDATE posts SET post_status = '$bulk_options' WHERE post_id = $postValueId ");
+				confirmQuery($pub_post_query);
+				if ($pub_post_query) {
+					echo "<div class=\"alert alert-success\"><b>Post Published Successfully </b></div>";
+				} else {
+					echo '<div class="alert alert-danger">Failed: An Error Occured</div>';
+				}
+				break;
+
+			case 'draft':
+				$draft_post_query = mysqli_query($connect, "UPDATE posts SET post_status = '$bulk_options' WHERE post_id = $postValueId ");
+				confirmQuery($draft_post_query);
+				if ($draft_post_query) {
+					echo "<div class=\"alert alert-success\"><b>Post Drafted Successfully </b></div>";
+				} else {
+					echo '<div class="alert alert-danger">Failed: An Error Occured</div>';
+				}
+				break;
+
+			case 'delete':
+				$delete_post_query = mysqli_query($connect, "DELETE FROM posts  WHERE post_id = $postValueId ");
+				confirmQuery($delete_post_query);
+				if ($delete_post_query) {
+					echo "<div class=\"alert alert-success\"><b>Post Deleted Successfully </b></div>";
+				} else {
+					echo '<div class="alert alert-danger">Failed: An Error Occured</div>';
+				}
+				break;
+
+			case 'clone':
+				$clone_query = mysqli_query($connect, "SELECT * FROM posts WHERE post_id = $postValueId");
+				while ($row = mysqli_fetch_assoc($clone_query)) {
+					$post_title       = $row['post_title'];
+					$post_category_id = $row['post_category_id'];
+					$post_date        = $row['post_date'];
+					$post_author      = $row['post_author'];
+					$post_status      = $row['post_status'];
+					$post_image       = $row['post_image'];
+					$post_tags        = $row['post_tags'];
+					$post_content     = $row['post_content'];
+				}
+				$insert_clone = mysqli_query($connect, "INSERT INTO posts (post_category_id, post_title, post_author, post_date, post_image, post_status, post_tags, post_content) VALUES ('$post_category_id', '$post_title', '$post_author', '$post_date', '$post_image', '$post_status', '$post_tags', '$post_content') ");
+				confirmQuery($insert_clone);
+				if ($insert_clone) {
+					echo "<div class=\"alert alert-success\"><b>Post Successfully Cloned </b></div>";
+				} else {
+					echo "<div class=\"alert alert-danger\">Failed: An Error Occured</div>";
+				}
+				break;
+
+			default:
+				// code...
+				break;
+		}
+
+	}
+}
+?>
+<form action="" method="POST">
+
+<table class="table table-bordered table-responsive">
+
+    <div id="bulkoptioncontainer">
+        <div class="form-group">
+            <div class="row">
+                <div class="col-md-3 col-sm-6 col-xs-6">
+
+                    <select name="bulk_options" id="" class="form-control">
+                        <option value="" selected="" disabled="">Select Options</option>
+                        <option value="published">Publish</option>
+                        <option value="draft">Draft</option>
+                        <option value="delete">Delete</option>
+                        <option value="clone">Clone</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 col-sm-6 col-xs-6">
+                    <input type="submit" name="submit" class="btn btn-success" value="Apply">
+                    <a href="posts.php?source=add-post" class="btn btn-primary ">Add New</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <thead>
+        <tr>
+            <th><input type="checkbox" id="selectAllBoxes"></th>
+            <th>ID</th>
+            <th>Author</th>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Image</th>
+            <th>Tags</th>
+            <th>Comments</th>
+            <th>Date</th>
+            <th>Post Views</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+
+<?php
+$get_allPostsQuery = mysqli_query($connect, "SELECT * FROM posts ORDER BY post_id DESC");
+$num               = 1;
+while ($row = mysqli_fetch_assoc($get_allPostsQuery)) {
+	$post_id          = $row['post_id'];
+	$post_cat_id      = $row['post_category_id'];
+	$post_author      = $row['post_author'];
+	$post_title       = $row['post_title'];
+	$post_date        = $row['post_date'];
+	$post_image       = $row['post_image'];
+	$post_comment     = $row['post_comment_count'];
+	$post_tags        = $row['post_tags'];
+	$post_status      = $row['post_status'];
+	$post_views_count = $row['post_views_count'];
+	?>
+	        <tr>
+	            <td><input type="checkbox" class="checkBoxes" name="checkBoxArray[]" value="<?php echo $post_id?>"></td>
+	            <td><?php echo $num++;?></td>
+	            <td><?php echo $post_author;?></td>
+	            <td><?php echo $post_title;?></td>
+	<?php
+	$grabCategories = mysqli_query($connect, "SELECT * FROM categories WHERE cat_id = $post_cat_id ");
+	while ($row = mysqli_fetch_assoc($grabCategories)) {
+		$grab_cat_id    = $row['cat_id'];
+		$grab_cat_title = $row['cat_title'];
+		?>
+		                    <td><?php echo $grab_cat_title;?></td>
+		<?php }?>
+	            <td><?php echo $post_status;?></td>
+	            <td><img src="uploads/<?php echo $post_image?>" alt="" width="70"></td>
+	            <td><?php echo $post_tags;?></td>
+	            <td><?php echo $post_comment;?></td>
+	            <td><?php echo $post_date;?></td>
+
+	<?php
+	$get_comments = mysqli_query($connect, "SELECT * FROM comments WHERE comment_post_id = $post_id ");
+	confirmQuery($get_comments);
+	$row         = mysqli_fetch_assoc($get_comments);
+	$post_com_id = $row['comment_post_id'];
+	?>
+
+
+	             <td><?php echo $post_views_count;
+	?> &nbsp;
+	&nbsp;
+	&nbsp;
+	<a href="posts.php?reset=<?php echo $post_id?>" class="btn btn-default btn-xs" title="reset Views"><i class="fa fa-refresh"></i></a></td>
+
+	            <td>
+	                <a href="../post.php?slug=<?php echo $post_id?>" class="btn btn-success btn-xs"><span class="fa fa-eye"></span></a>
+	                <a href="posts.php?source=edit-post&p_id=<?php echo $post_id?>" class="btn btn-primary btn-xs"><span class="fa fa-edit"></span></a>
+	                <a onClick="javascript: return confirm('Are you sure you want to delete?')" href="posts.php?delete_post=<?php echo $post_id?>&delete_post_comment=<?php echo $post_com_id?>" class="btn btn-danger btn-xs"><span class="fa fa-trash-o"></span></a>
+	            </td>
+	        </tr>
+	<?php }?>
+</tbody>
+</table>
+</form>
+
+<?php
+
+// delete posts and comments st the same time
+if (isset($_GET['delete_post'])) {
+	$delete_post_id = $_GET['delete_post'];
+
+	$Query_delete = mysqli_query($connect, "DELETE FROM posts WHERE post_id = $delete_post_id ");
+	confirmQuery($Query_delete);
+
+	if ($Query_delete) {
+		header("Location: posts.php");
+	}
+}
+
+if (isset($_GET['delete_post_comment'])) {
+	$delete_comment_id = $_GET['delete_post_comment'];
+
+	$Query_delete_comment = mysqli_query($connect, "DELETE FROM comments WHERE comment_post_id = $delete_comment_id ");
+	confirmQuery($Query_delete_comment);
+
+	if ($Query_delete_comment) {
+		header("Location: posts.php");
+	}
+}
+
+// reset post views
+
+if (isset($_GET['reset']) && !empty($_GET['reset'])) {
+	$reset = $_GET['reset'];
+
+	$reset_views_query = mysqli_query($connect, "UPDATE posts SET post_views_count = 0 WHERE post_id =".mysqli_real_escape_string($connect, $_GET['reset'])." ");
+	confirmQuery($reset_views_query);
+	if ($reset_views_query) {
+		header("Location: posts.php");
+	}
+
+}
+
+?>

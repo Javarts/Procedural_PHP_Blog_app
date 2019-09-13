@@ -1,0 +1,59 @@
+<?php
+$title = "VIEW - POSTS";
+include ("inc/admin-header.php");
+delete_categories();
+
+if (isset($_GET['source'])) {
+	$source = $_GET['source'];
+} else {
+	$source = "";
+}
+
+?>
+<body>
+    <div id="wrapper">
+
+        <!-- Navigation -->
+<?php include ("inc/admin-alpha-nav.php")?>
+<div id="page-wrapper">
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">
+<?php if (isset($source) && $source == "add-user") {
+	echo 'Add User';
+} elseif (isset($source) && $source == "edit-user") {
+	echo 'Edit User';
+} else {
+	echo 'All Users';}
+?>
+</h1>
+
+<?php
+switch ($source) {
+	case "add-user":
+		include ("add-user.php");
+		break;
+
+	case "edit-user":
+		include ("edit-user.php");
+		break;
+
+	default:
+		include ("view_all_users.php");
+		break;
+}
+
+?>
+</div>
+                </div> <!-- /.row -->
+
+            </div> <!-- /.container-fluid -->
+
+        </div> <!-- /#page-wrapper -->
+
+    </div> <!-- /#wrapper -->
+
+<?php include ("inc/admin-footer.php")?>

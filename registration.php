@@ -1,0 +1,68 @@
+ <?php $title = 'REGISTRATION'; ?>
+ <?php  include "inc/header.php"; ?>
+
+
+<!-- Navigation -->
+<?php  include "inc/navbar.php"; ?>
+ 
+<!-- Page Content -->
+<div class="container" style="margin-top: 50px;">
+    
+<section id="login">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                <h1>Register</h1>
+<?php 
+
+    if (isset($_POST['submit'])) {
+        $username =  mysqli_real_escape_string($connect, $_POST['username']);
+        $email    =  mysqli_real_escape_string($connect, $_POST['email']);
+        $password =  mysqli_real_escape_string($connect, $_POST['password']);
+
+        if (!empty($username) && !empty($email) && !empty($password)) {
+            
+            $query = mysqli_query($connect, "SELECT randsalt FROM users");
+            confirmQuery($query);
+
+            $row = mysqli_fetch_array($query);
+            $salt = $row['randsalt'];
+            $password = crypt($password, $salt);
+
+
+
+                $insertQuery = mysqli_query($connect, "INSERT INTO users (username, user_email, user_password, user_role) VALUES ('$username', '$email', '$password', 'subscriber' ) ");
+                confirmQuery($insertQuery);
+                if ($insertQuery) {
+                    echo "<div class=\"alert alert-success\"><b>Registration was successful</b></div>";
+                }
+            } else {
+            echo "<div class=\"alert alert-danger\"><b>All fields are required</b></div>";
+        }
+    }       
+  ?>
+                <div class="form-wrap">
+                    <form role="form" action="registration.php" method="post" id="login-form" autocomplete="off">
+                        <div class="form-group">
+                            <label for="username" class="sr-only">username</label>
+                            <input type="text" name="username" id="username" class="form-control" placeholder="Enter Desired Username">
+                        </div>
+                         <div class="form-group">
+                            <label for="email" class="sr-only">Email</label>
+                            <input type="email" name="email" id="email" class="form-control" placeholder="somebody@example.com">
+                        </div>
+                         <div class="form-group">
+                            <label for="password" class="sr-only">Password</label>
+                            <input type="password" name="password" id="key" class="form-control" placeholder="Password">
+                        </div>
+                
+                        <input type="submit" name="submit" id="btn-login" class="btn btn-primary  btn-lg btn-block" value="Register">
+                    </form>
+                 
+                </div>
+            </div> <!-- /.col-xs-12 -->
+        </div> <!-- /.row -->
+    </div> <!-- /.container -->
+</section>
+
+<?php include "inc/footer.php";?>

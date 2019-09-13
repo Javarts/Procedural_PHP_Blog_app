@@ -1,0 +1,19 @@
+<?php
+
+function navCategories() {
+	global $connect;
+	$query = mysqli_query($connect, "SELECT * FROM categories");
+	while ($row = mysqli_fetch_assoc($query)) {
+		$cat_id    = $row['cat_id'];
+		$cat_title = $row['cat_title'];
+		echo "
+			<ul class='nav navbar-nav'>
+				<li>
+					<a href='#'> $cat_title </a>
+
+				</li>
+			</ul> ";
+	}
+}
+
+?>
